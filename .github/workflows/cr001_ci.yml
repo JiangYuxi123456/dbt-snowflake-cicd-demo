@@ -52,10 +52,10 @@ jobs:
           EOF
 
       - name: dbt debug
-        run: dbt debug --profiles-dir .dbt
+        run: dbt debug 
 
       - name: dbt deps
-        run: dbt deps --profiles-dir .dbt
+        run: dbt deps 
 
       - name: dbt build (modified models only)
-        run: dbt build --profiles-dir .dbt --fail-fast
+        run: dbt build --fail-fast
