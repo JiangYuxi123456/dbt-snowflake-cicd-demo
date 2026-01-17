@@ -1,4 +1,4 @@
-name: CR001 CI
+name: CR001 CI TEST
 
 on:
   workflow_dispatch:
