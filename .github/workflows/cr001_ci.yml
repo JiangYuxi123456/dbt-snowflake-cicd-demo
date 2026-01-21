@@ -39,6 +39,12 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
+      
+      - name: Write Snowflake private key
+        run: |
+          mkdir -p /home/runner/.ssh
+          echo "$SNOWFLAKE_PRIVATE_KEY" > /home/runner/.ssh/snowflake_key.pem
+          chmod 600 /home/runner/.ssh/snowflake_key.pem
 
       - name: Create dbt profiles.yml
         run: |
@@ -55,8 +61,7 @@ jobs:
                 database: ${SNOWFLAKE_DATABASE}
                 schema: ${SNOWFLAKE_SCHEMA}
                 authenticator: snowflake
-                private_key: |
-                  ${SNOWFLAKE_PRIVATE_KEY}
+                private_key_path: /home/runner/.ssh/snowflake_key.pem
 
                 threads: 1
             target: ci
