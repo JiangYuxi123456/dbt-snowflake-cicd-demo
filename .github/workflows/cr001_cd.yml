@@ -9,6 +9,14 @@ jobs:
   cr001-cd:
     runs-on: ubuntu-latest
     environment: CD
+    env:
+      SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+      SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+      SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+      SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
+      SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+      SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
     defaults:
       run:
         working-directory: cicd_demo
@@ -27,6 +35,12 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
+        
+      - name: Write Snowflake private key
+        run: |
+          mkdir -p /home/runner/.ssh
+          echo "$SNOWFLAKE_PRIVATE_KEY" > /home/runner/.ssh/snowflake_key.pem
+          chmod 600 /home/runner/.ssh/snowflake_key.pem
 
       - name: Create dbt profiles.yml
         run: |
@@ -36,13 +50,14 @@ jobs:
             outputs:
               cd:
                 type: snowflake
-                account: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-                user: ${{ secrets.SNOWFLAKE_USER }}
-                password: ${{ secrets.SNOWFLAKE_PASSWORD }}
-                role: ${{ secrets.SNOWFLAKE_ROLE }}
-                database: ${{ secrets.SNOWFLAKE_DATABASE }}
-                warehouse: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
-                schema: ${{ secrets.SNOWFLAKE_SCHEMA }}
+                account: ${SNOWFLAKE_ACCOUNT}
+                user: ${SNOWFLAKE_USER}
+                role: ${SNOWFLAKE_ROLE}
+                warehouse: ${SNOWFLAKE_WAREHOUSE}
+                database: ${SNOWFLAKE_DATABASE}
+                schema: ${SNOWFLAKE_SCHEMA}
+                authenticator: snowflake
+                private_key_path: /home/runner/.ssh/snowflake_key.pem
                 threads: 1
             target: cd
           EOF
