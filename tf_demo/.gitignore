@@ -3,3 +3,4 @@ hello.txt
 terraform.tfstate.backup
 terraform.tfstate
 .terraform.lock.hcl
+terraform.tfvars

@@ -21,6 +21,13 @@ jobs:
       SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
       SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
       SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
+
+      TF_VAR_snowflake_account: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      TF_VAR_snowflake_username: ${{ secrets.SNOWFLAKE_USER }}
+      TF_VAR_snowflake_role: ${{ secrets.SNOWFLAKE_ROLE }}
+      TF_VAR_snowflake_private_key_path: /home/runner/.ssh/snowflake_key.pem
+
+
     defaults:
       run:
         working-directory: cicd_demo
@@ -29,6 +36,32 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      
+      - name: Write Snowflake private key
+        run: |
+          mkdir -p /home/runner/.ssh
+          echo "$SNOWFLAKE_PRIVATE_KEY" > /home/runner/.ssh/snowflake_key.pem
+          chmod 600 /home/runner/.ssh/snowflake_key.pem
+
+      # --- TERRAFORM SECTION ---
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0" # Use your preferred version
+
+      - name: Terraform Init
+        working-directory: tf_demo
+        run: terraform init
+      
+
+      - name: Terraform Plan
+        working-directory: tf_demo
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: tf_demo
+        run: terraform apply -auto-approve tfplan
+
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -39,12 +72,6 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
-      
-      - name: Write Snowflake private key
-        run: |
-          mkdir -p /home/runner/.ssh
-          echo "$SNOWFLAKE_PRIVATE_KEY" > /home/runner/.ssh/snowflake_key.pem
-          chmod 600 /home/runner/.ssh/snowflake_key.pem
 
       - name: Create dbt profiles.yml
         run: |
