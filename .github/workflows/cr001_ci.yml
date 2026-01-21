@@ -12,6 +12,9 @@ on:
 jobs:
   cr001-ci:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # This is REQUIRED for OIDC
+      contents: read  # This is REQUIRED for Checkout
     environment: CI
     env:
       SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -36,6 +39,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::546712139089:role/githubconnect
+          aws-region: us-east-2
       
       - name: Write Snowflake private key
         run: |
