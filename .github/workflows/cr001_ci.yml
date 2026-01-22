@@ -8,13 +8,14 @@ on:
       - opened
       - synchronize
       - reopened
+permissions:
+  id-token: write # This is REQUIRED for OIDC
+  contents: read  # This is REQUIRED for Checkout
 
 jobs:
   cr001-ci:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write # This is REQUIRED for OIDC
-      contents: read  # This is REQUIRED for Checkout
+
     environment: CI
     env:
       SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
