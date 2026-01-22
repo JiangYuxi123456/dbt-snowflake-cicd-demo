@@ -44,8 +44,9 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::546712139089:role/githubconnect
+          role-to-assume: arn:aws:iam::448033706053:role/githubconnect
           aws-region: us-east-2
+
       
       - name: Write Snowflake private key
         run: |
@@ -116,3 +117,5 @@ jobs:
 
       - name: dbt build (modified models only)
         run: dbt build --fail-fast
+
+

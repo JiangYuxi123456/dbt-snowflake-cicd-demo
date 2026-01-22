@@ -14,6 +14,7 @@ variable "snowflake_private_key_path" {
   sensitive   = true
 }
 
+
 variable "snowflake_role" {
   description = "Snowflake role for provisioning"
   type        = string
