@@ -115,5 +115,3 @@ jobs:
 
       - name: dbt build (modified models only)
         run: dbt build --fail-fast
-
-
