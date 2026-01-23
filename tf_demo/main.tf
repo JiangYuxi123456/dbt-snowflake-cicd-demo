@@ -57,3 +57,4 @@ resource "snowflake_database" "demo_clone" {
   comment               = "Clone of the demo database"
   from_database = "SF2512_DB"
 }
+
