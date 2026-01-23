@@ -5,9 +5,19 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   cr001-cd:
     runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+
     environment: CD
     env:
       SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -17,6 +27,13 @@ jobs:
       SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
       SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
       SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
+
+      TF_VAR_snowflake_account: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      TF_VAR_snowflake_username: ${{ secrets.SNOWFLAKE_USER }}
+      TF_VAR_snowflake_role: ${{ secrets.SNOWFLAKE_ROLE }}
+      TF_VAR_snowflake_private_key_path: /home/runner/.ssh/snowflake_key.pem
+
+
     defaults:
       run:
         working-directory: cicd_demo
@@ -25,22 +42,43 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          python-version: "3.11"
+          role-to-assume: arn:aws:iam::448033706053:role/github-actions-terraform-role
+          aws-region: us-east-2
 
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
-        
       - name: Write Snowflake private key
         run: |
           mkdir -p /home/runner/.ssh
           echo "$SNOWFLAKE_PRIVATE_KEY" > /home/runner/.ssh/snowflake_key.pem
           chmod 600 /home/runner/.ssh/snowflake_key.pem
+
+      # ------------ Terraform --------------
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
+
+      - name: Terraform Init
+        working-directory: tf_demo
+        run: terraform init
+
+      - name: Terraform Apply (PROD)
+        working-directory: tf_demo
+        run: terraform apply -auto-approve
+
+      # ------------- dbt --------------
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+   
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Create dbt profiles.yml
         run: |
@@ -62,14 +100,5 @@ jobs:
             target: cd
           EOF
 
-      - name: dbt debug
-        run: dbt debug 
-
-      - name: dbt deps
-        run: dbt deps 
-
       - name: dbt build (deploy to prod)
         run: dbt build 
-
-      - name: dbt test
-        run: dbt test
