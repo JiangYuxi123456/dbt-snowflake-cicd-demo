@@ -41,14 +41,15 @@ jobs:
         working-directory: cicd_demo
 
 
-    steps:
+    steps: 
       - name: Checkout code
         uses: actions/checkout@v4
       
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::448033706053:role/githubconnect
+          role-to-assume: arn:aws:iam::448033706053:role/github-actions-terraform-role
+
           aws-region: us-east-2
 
       
