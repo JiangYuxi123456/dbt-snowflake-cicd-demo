@@ -58,3 +58,20 @@ resource "snowflake_database" "demo_clone" {
   from_database = "SF2512_DB"
 }
 
+resource "snowflake_database" "sf_cicd_demo" {
+  name    = "SF_CICD_DEMO"
+  comment = "Database managed by Terraform for CI/CD demo"
+}
+
+resource "snowflake_schema" "dev" {
+  database = snowflake_database.sf_cicd_demo.name
+  name     = "DEV"
+  comment  = "Development schema"
+}
+
+resource "snowflake_schema" "pro" {
+  database = snowflake_database.sf_cicd_demo.name
+  name     = "PRO"
+  comment  = "Production schema"
+}
+
