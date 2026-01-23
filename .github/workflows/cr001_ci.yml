@@ -2,7 +2,8 @@ name: CR001 CI
 
 on:
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 permissions:
   id-token: write # This is REQUIRED for OIDC
