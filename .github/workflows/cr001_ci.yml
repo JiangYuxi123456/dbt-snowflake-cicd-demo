@@ -79,9 +79,9 @@ jobs:
         working-directory: tf_demo
         run: terraform plan -out=tfplan
 
-      - name: Terraform Apply
-        working-directory: tf_demo
-        run: terraform apply -auto-approve tfplan
+      # - name: Terraform Apply
+      #   working-directory: tf_demo
+      #   run: terraform apply -auto-approve tfplan
 
       - name: Set up Python
         uses: actions/setup-python@v5
