@@ -23,12 +23,13 @@ backend "s3" {
 }
 
 provider "aws" {
-  region = "us-east-2"
+  region = "us-east-1"
 }
 
 provider "snowflake" {
   account  = var.snowflake_account
   username = var.snowflake_username
+  # password = var.snowflake_password
   private_key = file(var.snowflake_private_key_path)
   role     = var.snowflake_role
   # region   = var.snowflake_region

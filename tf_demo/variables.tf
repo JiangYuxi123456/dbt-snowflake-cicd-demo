@@ -1,5 +1,5 @@
 variable "snowflake_account" {
-  description = "qz47466.ca-central-1.aws"
+  description = "Snowflake account name"
   type        = string
 }
 
@@ -13,6 +13,13 @@ variable "snowflake_private_key_path" {
   type        = string
   sensitive   = true
 }
+
+variable "snowflake_password" {
+  description = "the path of Snowflake private key (PEM, base64 or raw)"
+  type        = string
+  sensitive   = true
+}
+
 
 
 variable "snowflake_role" {
