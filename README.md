@@ -3,59 +3,71 @@
 - [Tech Stack](#tech-stack)
 - [Repository Structure](#repository-structure)
 - [Secrets Management](#secrets-management)
+- [Infrastructure as Code (Terraform)](#infrastructure-as-code-terraform)
 - [CI / CD Workflow](#ci--cd-workflow)
 
 
 
 ## Project Overview
-This project demonstrates a dbt + Snowflake analytics pipeline with a full CI/CD workflow implemented using GitHub Actions.
+This repository demonstrates a dbt + Snowflake analytics pipeline with CI/CD
+implemented using GitHub Actions. Infrastructure components are managed using
+Terraform.
 
 ## Tech Stack
-- dbt Core
-- Snowflake
-- GitHub Actions
-- Python 3.11
+- dbt Core  
+- Snowflake (Key Pair Authentication)  
+- GitHub Actions  
+- Terraform  
+- AWS (S3, DynamoDB)  
+- Python 3.11  
 
 ## Repository Structure
 .
-
-├── cicd_demo/              # dbt project
-
+├── cicd_demo/ # dbt project
 │ ├── models/
-
 │ ├── macros/
-
-│├── dbt_project.yml
-
+│ └── dbt_project.yml
 │
-
-├── .github/workflows/      # CI/CD workflows
-
-│├── cr001_ci.yml
-
-│├── cr001_cd.yml
-
+├── tf_demo/ # Terraform demo
+│ ├── main.tf
+│ ├── variables.tf
+│ └── .terraform.lock.hcl
 │
-
+├── .github/workflows/ # CI/CD workflows
+│ ├── cr001_ci.yml
+│ └── cr001_cd.yml
+│
 ├── requirements.txt
-
 └── README.md
 
 
 ## Secrets Management
 
-All Snowflake credentials are securely managed using **GitHub Environments and Secrets**.
+All sensitive credentials are managed using **GitHub Environments and Secrets**.
+No secrets are committed to source control.
 
-Sensitive information such as Snowflake account, user, password, role, warehouse, and database
-are **never committed to the repository**.
+Snowflake authentication is handled using **key pair authentication**.
+The Snowflake private key is stored securely as a GitHub Secret
+(`SNOWFLAKE_PRIVATE_KEY`) and injected at runtime.
 
-During CI/CD execution, a `profiles.yml` file is dynamically generated at runtime using
-GitHub Secrets and injected into the GitHub Actions runner.
+During CI/CD execution, a `profiles.yml` file is generated dynamically on the
+GitHub Actions runner using environment secrets.
 
 This approach ensures:
-- No credentials are stored in source control
-- Different environments (CI / CD) can use different credentials
-- Secure, auditable credential management
+- Credentials are never stored in the repository
+- Password-based authentication is avoided
+- CI and CD environments can be isolated and audited
+
+
+## Infrastructure as Code (Terraform)
+
+Terraform is used to define and validate infrastructure configuration.
+
+- Remote state is stored in **AWS S3**
+- State locking is handled via **AWS DynamoDB**
+- Provider versions are locked using `.terraform.lock.hcl`
+
+Terraform state files are excluded from version control.
 
 
 ## CI / CD Workflow
