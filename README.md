@@ -9,9 +9,9 @@
 
 
 ## Project Overview
-This repository demonstrates a dbt + Snowflake analytics pipeline with CI/CD
-implemented using GitHub Actions. Infrastructure components are managed using
-Terraform.
+This repository demonstrates a dbt + Snowflake analytics pipeline with CI/CD implemented using GitHub Actions. Infrastructure components are managed using Terraform.
+
+
 
 ## Tech Stack
 - dbt Core  
@@ -21,42 +21,58 @@ Terraform.
 - AWS (S3, DynamoDB)  
 - Python 3.11  
 
+
+
 ## Repository Structure
 .
+
 ├── cicd_demo/ # dbt project
+
 │ ├── models/
+
 │ ├── macros/
+
+│ ├── requirements.txt
+
 │ └── dbt_project.yml
+
 │
+
 ├── tf_demo/ # Terraform demo
+
 │ ├── main.tf
+
 │ ├── variables.tf
+
 │ └── .terraform.lock.hcl
+
 │
+
 ├── .github/workflows/ # CI/CD workflows
+
 │ ├── cr001_ci.yml
+
 │ └── cr001_cd.yml
+
 │
-├── requirements.txt
+
 └── README.md
+
 
 
 ## Secrets Management
 
-All sensitive credentials are managed using **GitHub Environments and Secrets**.
-No secrets are committed to source control.
+All sensitive credentials are managed using **GitHub Environments and Secrets**. No secrets are committed to source control.
 
-Snowflake authentication is handled using **key pair authentication**.
-The Snowflake private key is stored securely as a GitHub Secret
-(`SNOWFLAKE_PRIVATE_KEY`) and injected at runtime.
+Snowflake authentication is handled using **key pair authentication**. The Snowflake private key is stored securely as a GitHub Secret (`SNOWFLAKE_PRIVATE_KEY`) and injected at runtime.
 
-During CI/CD execution, a `profiles.yml` file is generated dynamically on the
-GitHub Actions runner using environment secrets.
+During CI/CD execution, a `profiles.yml` file is generated dynamically on the GitHub Actions runner using environment secrets.
 
 This approach ensures:
 - Credentials are never stored in the repository
 - Password-based authentication is avoided
 - CI and CD environments can be isolated and audited
+
 
 
 ## Infrastructure as Code (Terraform)
@@ -70,9 +86,11 @@ Terraform is used to define and validate infrastructure configuration.
 Terraform state files are excluded from version control.
 
 
+
 ## CI / CD Workflow
 
 This project implements a full CI/CD workflow using **GitHub Actions** to validate and deploy dbt models to Snowflake in a controlled and automated manner.
+
 
 
 ### Branching Strategy
@@ -82,7 +100,7 @@ This project implements a full CI/CD workflow using **GitHub Actions** to valida
   - Always represents a deployable state
   - All deployments (CD) are triggered from this branch
 
-- **crXXX (e.g. cr001)**
+- **cr001**
   - Feature / change request branches
   - All development and testing happens here
   - Changes must pass CI checks before merging into `main`
@@ -90,8 +108,7 @@ This project implements a full CI/CD workflow using **GitHub Actions** to valida
 
 ### Continuous Integration (CI)
 
-The CI workflow is triggered when a pull request is opened or updated
-targeting the `main` branch.
+The CI workflow is triggered when a pull request is opened or updated targeting the `main` branch.
 
 **Purpose:**
 - Validate dbt code changes before merge
@@ -106,6 +123,11 @@ targeting the `main` branch.
   - reopened
 
 **CI Steps Include:**
+
+- Checkout pull request code
+- Authenticate to AWS via GitHub OIDC
+- Run terraform init and terraform plan (no apply)
+- Set up Python environment
 - Install dependencies
 - Generate dbt `profiles.yml` using GitHub Secrets
 - Run `dbt debug`
@@ -128,11 +150,9 @@ The CD workflow is triggered automatically when changes are merged into the `mai
 - `push` events on the `main` branch
 
 **CD Steps Include:**
-- Install dependencies
-- Generate production dbt `profiles.yml`
-- Run `dbt debug`
-- Run `dbt deps`
-- Run `dbt build --fail-fast`
-- Run `dbt test`
+- Checkout production code
+- Authenticate to AWS via GitHub OIDC
+- Apply infrastructure changes using Terraform
+- Deploy analytics code with dbt build (deploy to prod)
 
 This ensures that only reviewed and validated changes are deployed to the production Snowflake environment.
